@@ -15,7 +15,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ds_fruaddetection",
+						"referenceName": "ds_dataflow",
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
@@ -39,6 +39,19 @@
 				")) ~> derivedColumn1",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     input(",
+				"          transaction_id as string,",
+				"          user_id as string,",
+				"          transaction_amount as string,",
+				"          transaction_timestamp as string,",
+				"          merchant_category as string,",
+				"          device_id as string,",
+				"          ip_address as string,",
+				"          is_fraudulent as string,",
+				"          location_country as string,",
+				"          location_city as string,",
+				"          Region as string",
+				"     ),",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
