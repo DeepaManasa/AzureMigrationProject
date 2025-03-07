@@ -29,6 +29,7 @@
 			"scriptLines": [
 				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: false) ~> source1",
 				"source1 derive(Region = case(\r",
 				"    byName('location_country') == 'USA', 'North America',\r",
@@ -36,7 +37,9 @@
 				"    byName('location_country') == 'Belgium', 'Europe',\r",
 				"    byName('location_country') == 'Switzerland', 'Europe',\r",
 				"    'Other'\r",
-				")) ~> derivedColumn1",
+				"),",
+				"          transactiondate = split(byName('transaction_timestamp'),\" \")[1],",
+				"          transactiontime = split(byName('transaction_timestamp'),\" \")[2]) ~> derivedColumn1",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
