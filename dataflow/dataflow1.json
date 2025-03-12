@@ -10,6 +10,9 @@
 						"type": "DatasetReference"
 					},
 					"name": "source1"
+				},
+				{
+					"name": "source2"
 				}
 			],
 			"sinks": [
@@ -24,6 +27,13 @@
 			"transformations": [
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "MapDrifted1",
+					"description": "Creates an explicit mapping for each drifted column"
+				},
+				{
+					"name": "select1"
 				}
 			],
 			"scriptLines": [
@@ -31,6 +41,8 @@
 				"     validateSchema: false,",
 				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: false) ~> source1",
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> source2",
 				"source1 derive(Region = case(\r",
 				"    byName('location_country') == 'USA', 'North America',\r",
 				"    byName('location_country') == 'Canada', 'North America',\r",
@@ -40,7 +52,33 @@
 				"),",
 				"          transactiondate = split(byName('transaction_timestamp'),\" \")[1],",
 				"          transactiontime = split(byName('transaction_timestamp'),\" \")[2]) ~> derivedColumn1",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"derivedColumn1 derive(transaction_id = toShort(byName('transaction_id')),",
+				"          user_id = toShort(byName('user_id')),",
+				"          transaction_amount = toDouble(byName('transaction_amount')),",
+				"          transaction_timestamp = toString(byName('transaction_timestamp')),",
+				"          merchant_category = toString(byName('merchant_category')),",
+				"          device_id = toString(byName('device_id')),",
+				"          ip_address = toString(byName('ip_address')),",
+				"          is_fraudulent = toBoolean(byName('is_fraudulent')),",
+				"          location_country = toString(byName('location_country')),",
+				"          location_city = toString(byName('location_city'))) ~> MapDrifted1",
+				"MapDrifted1 select(mapColumn(",
+				"          Region,",
+				"          transactiondate,",
+				"          transactiontime,",
+				"          transaction_id,",
+				"          user_id,",
+				"          transaction_amount,",
+				"          merchant_category,",
+				"          device_id,",
+				"          ip_address,",
+				"          is_fraudulent,",
+				"          location_country,",
+				"          location_city",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          transaction_id as string,",
