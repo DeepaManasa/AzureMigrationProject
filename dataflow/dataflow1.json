@@ -12,6 +12,10 @@
 					"name": "source1"
 				},
 				{
+					"dataset": {
+						"referenceName": "ds_curateddataflow",
+						"type": "DatasetReference"
+					},
 					"name": "source2"
 				}
 			],
@@ -22,6 +26,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_stagingdataflow",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
 				}
 			],
 			"transformations": [
@@ -34,6 +45,9 @@
 				},
 				{
 					"name": "select1"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -41,8 +55,24 @@
 				"     validateSchema: false,",
 				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: false) ~> source1",
-				"source(allowSchemaDrift: true,",
-				"     validateSchema: false) ~> source2",
+				"source(output(",
+				"          Region as string,",
+				"          transactiondate as string,",
+				"          transactiontime as string,",
+				"          transaction_id as string,",
+				"          user_id as string,",
+				"          transaction_amount as string,",
+				"          merchant_category as string,",
+				"          device_id as string,",
+				"          ip_address as string,",
+				"          is_fraudulent as string,",
+				"          location_country as string,",
+				"          location_city as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false) ~> source2",
 				"source1 derive(Region = case(\r",
 				"    byName('location_country') == 'USA', 'North America',\r",
 				"    byName('location_country') == 'Canada', 'North America',\r",
@@ -78,6 +108,11 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
+				"source2 aggregate(groupBy(device_id,",
+				"          transactiondate,",
+				"          Region,",
+				"          merchant_category),",
+				"     is_fraudulent = sum(case(is_fraudulent == 'true', 1, 0))) ~> aggregate1",
 				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -97,7 +132,14 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true) ~> sink1",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink2"
 			]
 		}
 	}
