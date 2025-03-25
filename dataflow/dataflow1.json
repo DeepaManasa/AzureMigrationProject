@@ -112,7 +112,7 @@
 				"          transactiondate,",
 				"          Region,",
 				"          merchant_category),",
-				"     is_fraudulent = sum(case(is_fraudulent == 'true', 1, 0))) ~> aggregate1",
+				"     is_fraudulent = sum(iif(is_fraudulent == 'true', 1, 0))) ~> aggregate1",
 				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
