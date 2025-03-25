@@ -47,7 +47,10 @@
 					"name": "select1"
 				},
 				{
-					"name": "aggregate1"
+					"name": "select2"
+				},
+				{
+					"name": "derivedColumn2"
 				}
 			],
 			"scriptLines": [
@@ -89,7 +92,8 @@
 				"          merchant_category = toString(byName('merchant_category')),",
 				"          device_id = toString(byName('device_id')),",
 				"          ip_address = toString(byName('ip_address')),",
-				"          is_fraudulent = toBoolean(byName('is_fraudulent')),",
+				"          is_fraudulent = toBoolean(byName('is_fraudulent'))\r",
+				",",
 				"          location_country = toString(byName('location_country')),",
 				"          location_city = toString(byName('location_city'))) ~> MapDrifted1",
 				"MapDrifted1 select(mapColumn(",
@@ -108,11 +112,20 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"source2 aggregate(groupBy(device_id,",
-				"          transactiondate,",
+				"source2 select(mapColumn(",
 				"          Region,",
-				"          merchant_category),",
-				"     is_fraudulent = sum(iif(is_fraudulent == 'true', 1, 0))) ~> aggregate1",
+				"          transactiondate,",
+				"          transactiontime,",
+				"          transaction_id,",
+				"          user_id,",
+				"          transaction_amount,",
+				"          merchant_category,",
+				"          device_id,",
+				"          is_fraudulent",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 derive(is_fraudulent = iif(is_fraudulent == 'true', 1, 0)) ~> derivedColumn2",
 				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -132,14 +145,16 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1",
-				"aggregate1 sink(allowSchemaDrift: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1) ~> sink1",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink2"
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 2) ~> sink2"
 			]
 		}
 	}
