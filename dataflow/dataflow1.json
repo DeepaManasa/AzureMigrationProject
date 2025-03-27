@@ -148,7 +148,7 @@
 				"     saveOrder: 1) ~> sink1",
 				"derivedColumn2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     partitionFileNames:[(concat('transactions_aggregated_',toString(currentTimestamp(),'yyyyMMddHHmmss'),'-[n].csv'))],",
+				"     partitionFileNames:[(concat('transactions_aggregated_',toString(currentTimestamp(),'yyyyMMddHHmmss'),'.csv'))],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
