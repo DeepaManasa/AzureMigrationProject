@@ -11,10 +11,9 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@concat('transactions_aggregated_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')\n\n",
+					"value": "\n\n",
 					"type": "Expression"
 				},
-				"folderPath": "transactions_gold",
 				"fileSystem": "staging"
 			},
 			"columnDelimiter": ",",
